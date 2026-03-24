@@ -1,12 +1,9 @@
-# DeviceMonitoringService — CoreWCF с HTTP и TCP транспортом
+DeviceMonitoringService — CoreWCF с HTTP и TCP транспортом
+Описание
+Сервис мониторинга устройств, реализованный на CoreWCF и развёрнутый в ASP.NET Core. Поддерживает одновременную работу по двум транспортным протоколам: HTTP (BasicHttpBinding) и TCP (NetTcpBinding).
 
-## Описание
-
-CoreWCF-служба мониторинга устройств, размещённая в ASP.NET Core, с поддержкой двух транспортных протоколов одновременно: **HTTP** (BasicHttpBinding) и **TCP** (NetTcpBinding).
-
-## Структура проекта
-
-```
+Структура проекта
+text
 DeviceMonitoringService.sln
 ├── Contracts/              — контракты данных и служб (общая библиотека)
 │   ├── DeviceInfo.cs       — [DataContract] модель устройства
@@ -18,11 +15,8 @@ DeviceMonitoringService.sln
 │   └── Program.cs
 └── TcpClient/              — консольный клиент (NetTcpBinding)
     └── Program.cs
-```
-
-## Контракт службы
-
-```csharp
+Контракт службы
+text
 [ServiceContract]
 public interface IDeviceManager
 {
@@ -31,54 +25,37 @@ public interface IDeviceManager
     [OperationContract] bool PingDevice(int id);
     [OperationContract] string GetServiceStats();
 }
-```
+Эндпоинты
+Протокол	Binding	Адрес
+HTTP	BasicHttpBinding	http://localhost:5000/DeviceService/http
+TCP	NetTcpBinding	net.tcp://localhost:8090/DeviceService/tcp
+WSDL	Metadata	http://localhost:5000/DeviceService/http?wsdl
+Запуск
+Требования
+.NET 8.0 SDK
 
-## Эндпоинты
-
-| Протокол | Binding          | Адрес                                        |
-|----------|------------------|----------------------------------------------|
-| HTTP     | BasicHttpBinding | `http://localhost:5000/DeviceService/http`    |
-| TCP      | NetTcpBinding    | `net.tcp://localhost:8090/DeviceService/tcp`  |
-| WSDL     | Metadata         | `http://localhost:5000/DeviceService/http?wsdl` |
-
-## Как запустить
-
-### Требования
-- .NET 8.0 SDK
-
-### 1. Сборка
-```bash
+1. Сборка
+text
 dotnet build
-```
-
-### 2. Запуск сервиса
-```bash
+2. Запуск сервиса
+text
 dotnet run --project DeviceMonitoringService
-```
-
-### 3. Запуск HTTP-клиента (в отдельном терминале)
-```bash
+3. Запуск HTTP-клиента (в отдельном терминале)
+text
 dotnet run --project HttpClient
-```
-
-### 4. Запуск TCP-клиента (в отдельном терминале)
-```bash
+4. Запуск TCP-клиента (в отдельном терминале)
+text
 dotnet run --project TcpClient
-```
-
-## Скриншоты работы
-
-### Запуск сервиса
-```
+Примеры работы
+Запуск сервиса
+text
 Service starting...
 HTTP endpoint: http://localhost:5000/DeviceService/http
 TCP endpoint:  net.tcp://localhost:8090/DeviceService/tcp
 Now listening on: http://0.0.0.0:8090
 Now listening on: http://localhost:5000
-```
-
-### HTTP-клиент
-```
+HTTP-клиент
+text
 === HTTP CLIENT ===
 Connecting to http://localhost:5000/DeviceService/http ...
 
@@ -96,10 +73,8 @@ Total devices: 10
 
 --- GetServiceStats ---
   Stats: HTTP calls: 4, TCP calls: 0
-```
-
-### TCP-клиент
-```
+TCP-клиент
+text
 === TCP CLIENT ===
 Connecting to net.tcp://localhost:8090/DeviceService/tcp ...
 
@@ -115,20 +90,18 @@ Connecting to net.tcp://localhost:8090/DeviceService/tcp ...
 === PERFORMANCE TEST ===
   100 calls via TCP: 28 ms
   Average: 0.28 ms per call
-```
+Особенности реализации
+Хранение данных : ConcurrentDictionary<int, DeviceInfo> со статическими тестовыми данными (10 устройств)
 
-## Реализация
+Подсчёт вызовов : OperationContext.Current определяет тип транспорта (HTTP/TCP) и ведёт раздельную статистику
 
-- **Хранение данных**: `ConcurrentDictionary<int, DeviceInfo>` со статическими mock-данными (10 устройств)
-- **Подсчёт вызовов**: `OperationContext.Current` определяет тип транспорта (HTTP/TCP) и ведёт раздельную статистику
-- **DI**: сервис регистрируется через CoreWCF `AddService<DeviceService>()`
-- **Безопасность**: отключена для упрощения (`SecurityMode.None`)
+DI : регистрация сервиса выполняется через CoreWCF AddService<DeviceService>()
 
-## Используемые пакеты
+Безопасность : отключена для упрощения (SecurityMode.None)
 
-| Проект                  | Пакеты                                          |
-|-------------------------|--------------------------------------------------|
-| Contracts               | System.ServiceModel.Primitives                   |
-| DeviceMonitoringService | CoreWCF.Primitives, CoreWCF.Http, CoreWCF.NetTcp |
-| HttpClient              | System.ServiceModel.Http                         |
-| TcpClient               | System.ServiceModel.NetTcp                       |
+Используемые пакеты
+Проект	Пакеты
+Contracts	System.ServiceModel.Primitives
+DeviceMonitoringService	CoreWCF.Primitives, CoreWCF.Http, CoreWCF.NetTcp
+HttpClient	System.ServiceModel.Http
+TcpClient	System.ServiceModel.NetTcp
